@@ -3,5 +3,9 @@ import "./Button.css";
 
 export default function Button(props) {
 	const isButtonLarge = props.size === "double";
-	return <button className={`${isButtonLarge ? "size-double" : ""} ${props.color}`}>{props.label}</button>;
+	return (
+		<button name={props.name} className={`${isButtonLarge ? "size-double" : ""} ${props.color}`} onClick={props.onClick}>
+			{props.label}
+		</button>
+	);
 }
