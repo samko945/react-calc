@@ -1,0 +1,15 @@
+button {
+	height: 4.6rem;
+	width: 5rem;
+	color: rgb(241, 241, 241);
+	background-color: rgb(119, 126, 126);
+	border: 1px solid rgb(46, 46, 46);
+	font-size: 2rem;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.size-double {
+	width: 10rem;
+}
