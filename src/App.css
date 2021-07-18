@@ -1,10 +1,8 @@
-*,
+/* *,
 *::before,
 *::after {
 	box-sizing: border-box;
-	margin: 0;
-	padding: 0;
-}
+} */
 
 body {
 	background-color: rgb(182, 182, 182);
@@ -13,11 +11,10 @@ body {
 .App {
 	width: 20rem;
 	height: 30rem;
-	background-color: rgb(116, 116, 116);
+	background-color: #747474;
 	margin: 0 auto;
 	margin-top: 1rem;
-	box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.205);
-	border-radius: 0.75rem;
+	box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
 	overflow: hidden;
-	border: 1px solid rgb(177, 177, 177);
+	border: 1px solid #b1aaaa;
 }

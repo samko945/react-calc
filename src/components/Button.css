@@ -2,14 +2,36 @@ button {
 	height: 4.6rem;
 	width: 5rem;
 	color: rgb(241, 241, 241);
-	background-color: rgb(119, 126, 126);
-	border: 1px solid rgb(46, 46, 46);
+	background-color: #000000;
+	border: 1px solid #494949;
 	font-size: 2rem;
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	cursor: pointer;
+}
+
+.col-s1 {
+	background-color: #777e7e;
+}
+.col-s1:hover {
+	background-color: #7a8585;
+}
+
+.col-s2 {
+	background-color: #616161;
+}
+.col-s2:hover {
+	background-color: #706969;
+}
+
+.col-p1 {
+	background-color: #e2b213;
+}
+.col-p1:hover {
+	background-color: rgb(240, 191, 30);
 }
 
 .size-double {
-	width: 10rem;
+	width: calc(10rem + 1px);
 }
