@@ -4,32 +4,82 @@ import Display from "./components/Display";
 import ButtonGrid from "./components/ButtonGrid";
 
 const calcDefaultState = {
-	currentValue: null,
-	currentValueDecimal: false,
-	previousValue: 0,
+	firstValue: null,
+	secondValue: null,
 	operator: null,
+	lastChanged: "firstValue",
 };
 
 const calcReducer = (state, action) => {
 	if (action.type === "NEW_VALUE") {
-		if (state.currentValue === null) {
-			return { ...state, currentValue: action.value };
+		if (state.operator !== null) {
+			// if there's an operator selected, user is entering the second value
+			if (state.secondValue === null) {
+				// replace null with first digit
+				return { ...state, secondValue: action.value, lastChanged: "secondValue" };
+			} else {
+				// otherwise concat the new digit to the previous
+				return {
+					...state,
+					secondValue: state.secondValue + action.value,
+					lastChanged: "secondValue",
+				};
+			}
+		}
+		if (state.firstValue === null) {
+			// replace null with first digit
+			return { ...state, firstValue: action.value, lastChanged: "firstValue" };
 		} else {
-			return { ...state, currentValue: state.currentValue + action.value };
+			// otherwise concat the new digit to the previous
+			return {
+				...state,
+				firstValue: state.firstValue + action.value,
+				lastChanged: "firstValue",
+			};
 		}
 	}
 	if (action.type === "OPERATE") {
-		if (action.value === "/" || action.value === "*" || action.value === "-" || action.value === "+") {
-			return { ...state, previousValue: state.currentValue, currentValue: null, operator: action.value };
+		const calculate = {
+			"/": (a, b) => Number(a) / Number(b),
+			"*": (a, b) => Number(a) * Number(b),
+			"-": (a, b) => Number(a) - Number(b),
+			"+": (a, b) => Number(a) + Number(b),
+		};
+
+		// don't set an operator if there is no first value
+		if (state.firstValue === null) return { ...state };
+
+		if (
+			action.value === "/" ||
+			action.value === "*" ||
+			action.value === "-" ||
+			action.value === "+"
+		) {
+			// set operator
+			if (state.operator === null) {
+				return { ...state, operator: action.value };
+			} else {
+				if (state.secondValue === null) return { ...state };
+				return {
+					...state,
+					operator: action.value,
+					firstValue: calculate[state.operator](state.firstValue, state.secondValue),
+					secondValue: null,
+					lastChanged: "firstValue",
+				};
+			}
 		}
+
 		if (action.value === "=") {
-			const calculate = {
-				"/": (a, b) => a / b,
-				"*": (a, b) => a * b,
-				"-": (a, b) => a - b,
-				"+": (a, b) => a + b,
+			// don't do anything if no operator is selected
+			if (state.operator === null) return { ...state };
+			return {
+				...state,
+				firstValue: calculate[state.operator](state.firstValue, state.secondValue),
+				secondValue: null,
+				lastChanged: "firstValue",
+				operator: null,
 			};
-			return { ...state, previousValue: calculate[state.operator](state.previousValue, state.currentValue || state.previousValue), currentValue: null, selectOperator: null };
 		}
 	}
 	return calcDefaultState;
@@ -45,7 +95,8 @@ function App() {
 	}
 	return (
 		<div className="App">
-			<Display value={calcState.currentValue || calcState.previousValue} />
+			{/* <Display value={calcState.secondValue || calcState.firstValue || 0} /> */}
+			<Display value={calcState[calcState.lastChanged] || 0} />
 			<ButtonGrid onValueClick={updateCurrentValue} onOperatorClick={selectOperator} />
 		</div>
 	);
