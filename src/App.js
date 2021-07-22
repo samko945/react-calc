@@ -1,120 +1,77 @@
-import React, { useReducer } from "react";
+import React, { useReducer, useEffect } from "react";
 import "./App.css";
 import Display from "./components/Display";
 import ButtonGrid from "./components/ButtonGrid";
 
 const calcDefaultState = {
-	firstValue: null,
-	secondValue: null,
-	operator: null,
-	lastChanged: "firstValue",
+	values: [{ type: "VALUE", value: "0" }],
+	display: "0",
 };
 
 const calcReducer = (state, action) => {
-	if (action.type === "NEW_VALUE") {
-		if (state.operator !== null) {
-			// if there's an operator selected, user is entering the second value
-			if (state.secondValue === null) {
-				// replace null with first digit
-				return { ...state, secondValue: action.value, lastChanged: "secondValue" };
-			} else {
-				// otherwise concat the new digit to the previous
-				return {
-					...state,
-					secondValue: state.secondValue + action.value,
-					lastChanged: "secondValue",
-				};
-			}
-		}
-		if (state.firstValue === null) {
-			// replace null with first digit
-			return { ...state, firstValue: action.value, lastChanged: "firstValue" };
+	if (action.type === "DISPLAY") {
+		return { ...state, display: String(action.value) };
+	}
+	if (action.type === "VALUE") {
+		const lastIndex = state.values.length - 1;
+		if (state.values[lastIndex].type === action.type) {
+			const newState = { ...state, values: [...state.values] };
+			newState.values[lastIndex] = {
+				...newState.values[lastIndex],
+				value: state.values[lastIndex].value + action.value,
+			};
+			return newState;
 		} else {
-			// otherwise concat the new digit to the previous
 			return {
 				...state,
-				firstValue: state.firstValue + action.value,
-				lastChanged: "firstValue",
+				values: [...state.values, { type: action.type, value: action.value }],
 			};
 		}
 	}
-	if (action.type === "OPERATE") {
-		const calculate = {
-			"/": (a, b) => Number(a) / Number(b),
-			"*": (a, b) => Number(a) * Number(b),
-			"-": (a, b) => Number(a) - Number(b),
-			"+": (a, b) => Number(a) + Number(b),
+
+	if (action.type === "OPERATOR") {
+		return {
+			...state,
+			values: [...state.values, { type: action.type, value: action.value }],
 		};
-
-		// don't set an operator if there is no first value
-		if (state.firstValue === null) return { ...state };
-
-		if (
-			action.value === "/" ||
-			action.value === "*" ||
-			action.value === "-" ||
-			action.value === "+"
-		) {
-			// set operator
-			if (state.operator === null) {
-				return { ...state, operator: action.value };
-			} else {
-				if (state.secondValue === null) return { ...state };
-				return {
-					...state,
-					operator: action.value,
-					firstValue: calculate[state.operator](state.firstValue, state.secondValue),
-					// secondValue: null,
-					lastChanged: "firstValue",
-				};
-			}
-		}
-
-		if (action.value === "=") {
-			// don't do anything if no operator is selected
-			if (state.operator === null) return { ...state };
-			return {
-				...state,
-				firstValue: calculate[state.operator](state.firstValue, state.secondValue),
-				// secondValue: null,
-				lastChanged: "firstValue",
-			};
-		}
 	}
 
-	if (action.type === "CLEAR") {
-		if (state.secondValue === null && state.firstValue !== null) {
-			if (state.operator !== null) {
-				return { ...state, operator: null };
-			} else {
-				return { ...state, firstValue: null };
-			}
-		} else {
-			if (state.secondValue !== null) {
-				return { ...state, secondValue: null };
-			} else {
-				return { ...state, firstValue: null, operator: null, secondValue: null };
-			}
-		}
-	}
-
+	const calculate = {
+		"/": (a, b) => Number(a) / Number(b),
+		"*": (a, b) => Number(a) * Number(b),
+		"-": (a, b) => Number(a) - Number(b),
+		"+": (a, b) => Number(a) + Number(b),
+	};
 	return calcDefaultState;
 };
 
 function App() {
 	const [calcState, dispatchCalcAction] = useReducer(calcReducer, calcDefaultState);
+
+	useEffect(() => {
+		calcState.values.forEach((item) => {
+			console.log(item.value);
+			if (item.type === "VALUE") {
+				dispatchCalcAction({
+					type: "DISPLAY",
+					value: Number(item.value),
+				});
+			}
+		});
+	}, [calcState.values]);
+
 	function updateCurrentValue(e) {
-		dispatchCalcAction({ type: "NEW_VALUE", value: e.target.name });
+		dispatchCalcAction({ type: "VALUE", value: e.target.name });
 	}
 	function selectOperator(e) {
-		dispatchCalcAction({ type: "OPERATE", value: e.target.name });
+		dispatchCalcAction({ type: "OPERATOR", value: e.target.name });
 	}
 	function clear() {
 		dispatchCalcAction({ type: "CLEAR" });
 	}
 	return (
 		<div className="App">
-			<Display value={calcState[calcState.lastChanged] || 0} />
+			<Display value={calcState.display} />
 			<ButtonGrid
 				calcState={calcState}
 				onValueClick={updateCurrentValue}
