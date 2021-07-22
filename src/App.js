@@ -64,7 +64,7 @@ const calcReducer = (state, action) => {
 					...state,
 					operator: action.value,
 					firstValue: calculate[state.operator](state.firstValue, state.secondValue),
-					secondValue: null,
+					// secondValue: null,
 					lastChanged: "firstValue",
 				};
 			}
@@ -76,12 +76,28 @@ const calcReducer = (state, action) => {
 			return {
 				...state,
 				firstValue: calculate[state.operator](state.firstValue, state.secondValue),
-				secondValue: null,
+				// secondValue: null,
 				lastChanged: "firstValue",
-				operator: null,
 			};
 		}
 	}
+
+	if (action.type === "CLEAR") {
+		if (state.secondValue === null && state.firstValue !== null) {
+			if (state.operator !== null) {
+				return { ...state, operator: null };
+			} else {
+				return { ...state, firstValue: null };
+			}
+		} else {
+			if (state.secondValue !== null) {
+				return { ...state, secondValue: null };
+			} else {
+				return { ...state, firstValue: null, operator: null, secondValue: null };
+			}
+		}
+	}
+
 	return calcDefaultState;
 };
 
@@ -93,11 +109,18 @@ function App() {
 	function selectOperator(e) {
 		dispatchCalcAction({ type: "OPERATE", value: e.target.name });
 	}
+	function clear() {
+		dispatchCalcAction({ type: "CLEAR" });
+	}
 	return (
 		<div className="App">
-			{/* <Display value={calcState.secondValue || calcState.firstValue || 0} /> */}
 			<Display value={calcState[calcState.lastChanged] || 0} />
-			<ButtonGrid onValueClick={updateCurrentValue} onOperatorClick={selectOperator} />
+			<ButtonGrid
+				calcState={calcState}
+				onValueClick={updateCurrentValue}
+				onOperatorClick={selectOperator}
+				onClearClick={clear}
+			/>
 		</div>
 	);
 }

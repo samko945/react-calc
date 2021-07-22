@@ -6,7 +6,16 @@ export default function ButtonGrid(props) {
 	return (
 		<div>
 			<div className="button-row">
-				<Button name="AC" onClick={props.onOperatorClick} label="AC" color="col-s2" />
+				<Button
+					name="C"
+					onClick={props.onClearClick}
+					label={
+						props.calcState.secondValue !== null || props.calcState.operator
+							? "CE"
+							: "C"
+					}
+					color="col-s2"
+				/>
 				<Button name="+/-" onClick={props.onOperatorClick} label="+/-" color="col-s2" />
 				<Button name="%" onClick={props.onOperatorClick} label="%" color="col-s2" />
 				<Button name="/" onClick={props.onOperatorClick} label="/" color="col-p1" />
@@ -30,7 +39,13 @@ export default function ButtonGrid(props) {
 				<Button name="+" onClick={props.onOperatorClick} label="+" color="col-p1" />
 			</div>
 			<div className="button-row">
-				<Button name="0" onClick={props.onValueClick} size="double" label="0" color="col-s1" />
+				<Button
+					name="0"
+					onClick={props.onValueClick}
+					size="double"
+					label="0"
+					color="col-s1"
+				/>
 				<Button name="." onClick={props.onValueClick} label="." color="col-s1" />
 				<Button name="=" onClick={props.onOperatorClick} label="=" color="col-p1" />
 			</div>
