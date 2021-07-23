@@ -4,8 +4,7 @@ import Display from "./components/Display";
 import ButtonGrid from "./components/ButtonGrid";
 
 const calcDefaultState = {
-	values: [{ type: "VALUE", value: "0" }],
-	lastType: "VALUE",
+	values: [{ type: "VALUE", value: "" }],
 	display: "0",
 };
 
@@ -21,7 +20,7 @@ const calcReducer = (state, action) => {
 			const newState = {
 				...state,
 				values: [...state.values],
-				display: Number(state.values[lastIndex].value + action.value),
+				display: state.values[lastIndex].value + action.value,
 			};
 			newState.values[lastIndex] = {
 				...newState.values[lastIndex],
@@ -31,7 +30,8 @@ const calcReducer = (state, action) => {
 		} else {
 			return {
 				...state,
-				values: [...state.values, { type: action.type, value: Number(action.value) }],
+				values: [...state.values, { type: action.type, value: action.value }],
+				display: action.value,
 			};
 		}
 	}
@@ -55,7 +55,7 @@ const calcReducer = (state, action) => {
 			if (index <= 1) return accumulator;
 			if (currentValue.type === "OPERATOR") return accumulator;
 			const operator = state.values[index - 1].value;
-			console.log(accumulator, operator, currentValue);
+			console.log(accumulator, operator, currentValue.value);
 			return calculate[operator](accumulator, currentValue.value);
 		}, state.values[0].value);
 		return { ...state, display: result };
