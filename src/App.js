@@ -9,10 +9,32 @@ const calcDefaultState = {
 };
 
 const calcReducer = (state, action) => {
+	const lastIndex = state.values.length - 1;
+	function reduceInputs() {
+		if (!state.values.length >= 3) return 0;
+		const calculate = {
+			"/": (a, b) => Number(a) / Number(b),
+			"*": (a, b) => Number(a) * Number(b),
+			"-": (a, b) => Number(a) - Number(b),
+			"+": (a, b) => Number(a) + Number(b),
+		};
+		const result = state.values.reduce((accumulator, currentValue, index) => {
+			if (index <= 1) return accumulator;
+			if (currentValue.type === "OPERATOR") return accumulator;
+			const operator = state.values[index - 1];
+			// skip entry if it's not an operator
+			if (operator.type !== "OPERATOR") return accumulator;
+			return calculate[operator.value](accumulator, currentValue.value);
+		}, state.values[0].value);
+		return result;
+	}
+	if (action.type === "UPDATE_DISPLAY") {
+		return { ...state, display: reduceInputs() };
+	}
+
 	if (action.type === "VALUE") {
-		const lastIndex = state.values.length - 1;
-		// if the last input type is a value, and another value is entered -> the user is still entering same value -> concat strings
-		if (state.values[lastIndex].type === action.type && action.type === "VALUE") {
+		// append new digit to existing digits forming new value
+		if (state.values[lastIndex].type === action.type) {
 			const newState = {
 				...state,
 				values: [...state.values],
@@ -24,6 +46,7 @@ const calcReducer = (state, action) => {
 			};
 			return newState;
 		} else {
+			// add value as new entry
 			return {
 				...state,
 				values: [...state.values, { type: action.type, value: action.value }],
@@ -33,28 +56,49 @@ const calcReducer = (state, action) => {
 	}
 
 	if (action.type === "OPERATOR") {
+		// ammend existing operator entry with the new value
+		if (state.values[lastIndex].type === "OPERATOR") {
+			const newState = {
+				...state,
+				values: [...state.values],
+			};
+			newState.values[lastIndex] = {
+				...newState.values[lastIndex],
+				value: action.value,
+			};
+			return newState;
+		}
+		// add operator as new entry
 		return {
 			...state,
 			values: [...state.values, { type: action.type, value: action.value }],
+			display: reduceInputs(),
 		};
 	}
 
-	if (action.type === "CALCULATE") {
-		if (!state.values.length >= 3) return { ...state };
-		const calculate = {
-			"/": (a, b) => Number(a) / Number(b),
-			"*": (a, b) => Number(a) * Number(b),
-			"-": (a, b) => Number(a) - Number(b),
-			"+": (a, b) => Number(a) + Number(b),
-		};
-		const result = state.values.reduce((accumulator, currentValue, index) => {
-			if (index <= 1) return accumulator;
-			if (currentValue.type === "OPERATOR") return accumulator;
-			const operator = state.values[index - 1].value;
-			console.log(accumulator, operator, currentValue.value);
-			return calculate[operator](accumulator, currentValue.value);
-		}, state.values[0].value);
-		return { ...state, display: result };
+	if (action.type === "EQUAL") {
+		const lastEntry = state.values[lastIndex];
+		if (lastEntry.type !== "EQUAL") {
+			return {
+				...state,
+				values: [...state.values, { type: action.type, value: action.value }],
+				display: reduceInputs(),
+			};
+		}
+		if (lastEntry.type === "EQUAL") {
+			const lastOperatorEntry = state.values[lastIndex - 2];
+			const lastValueEntry = state.values[lastIndex - 1];
+			return {
+				...state,
+				values: [
+					...state.values,
+					lastOperatorEntry,
+					lastValueEntry,
+					{ type: action.type, value: action.value },
+				],
+				display: reduceInputs(),
+			};
+		}
 	}
 
 	return calcDefaultState;
@@ -68,7 +112,10 @@ function App() {
 	}
 	function selectOperator(e) {
 		dispatchCalcAction({ type: "OPERATOR", value: e.target.name });
-		dispatchCalcAction({ type: "CALCULATE" });
+	}
+	function equalHandler(e) {
+		dispatchCalcAction({ type: "EQUAL", value: e.target.name });
+		dispatchCalcAction({ type: "UPDATE_DISPLAY" });
 	}
 	function clear() {
 		dispatchCalcAction({ type: "CLEAR" });
@@ -80,6 +127,7 @@ function App() {
 				calcState={calcState}
 				onValueClick={updateCurrentValue}
 				onOperatorClick={selectOperator}
+				onEqualClick={equalHandler}
 				onClearClick={clear}
 			/>
 		</div>

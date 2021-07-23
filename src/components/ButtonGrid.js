@@ -47,7 +47,7 @@ export default function ButtonGrid(props) {
 					color="col-s1"
 				/>
 				<Button name="." onClick={props.onValueClick} label="." color="col-s1" />
-				<Button name="=" onClick={props.onOperatorClick} label="=" color="col-p1" />
+				<Button name="=" onClick={props.onEqualClick} label="=" color="col-p1" />
 			</div>
 		</div>
 	);
