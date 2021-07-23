@@ -9,12 +9,8 @@ const calcDefaultState = {
 };
 
 const calcReducer = (state, action) => {
-	if (action.type === "DISPLAY") {
-		return { ...state, display: String(action.value) };
-	}
 	if (action.type === "VALUE") {
 		const lastIndex = state.values.length - 1;
-
 		// if the last input type is a value, and another value is entered -> the user is still entering same value -> concat strings
 		if (state.values[lastIndex].type === action.type && action.type === "VALUE") {
 			const newState = {
@@ -44,7 +40,7 @@ const calcReducer = (state, action) => {
 	}
 
 	if (action.type === "CALCULATE") {
-		if (!state.values.length >= 3) return;
+		if (!state.values.length >= 3) return { ...state };
 		const calculate = {
 			"/": (a, b) => Number(a) / Number(b),
 			"*": (a, b) => Number(a) * Number(b),
